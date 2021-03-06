@@ -47,8 +47,119 @@ const int dx[8] = {1, 0, -1, 0, 1, -1, -1, 1};
 const int dy[8] = {0, 1, 0, -1, 1, 1, -1, -1};
 const string dir = "DRUL";
 */
+uint32_t XorShift(void) {
+    static uint32_t x = 123456789;
+    static uint32_t y = 362436069;
+    static uint32_t z = 521288629;
+    static uint32_t w = 88675123;
+    uint32_t t;
+ 
+    t = x ^ (x << 11);
+    x = y; y = z; z = w;
+    return w = (w ^ (w >> 19)) ^ (t ^ (t >> 8));
+}
 
 
+const int H = 10000;
+const int W = 10000;
+
+class Solver{
+public:
+    int N;
+    vector<int> x, y, r;
+    vector<int> a, b, c, d;
+    Solver(){}
+    void input(){
+        cin >> N;
+        x.resize(N);
+        y.resize(N);
+        r.resize(N);
+        a.resize(N);
+        b.resize(N);
+        c.resize(N);
+        d.resize(N);
+        rep(i,N){
+            cin >> x[i] >> y[i] >> r[i];
+        }
+    }
+    bool check(int x1, int y1, int x2, int y2, int idx){
+        return x1 <= x[idx] && x[idx] < x2 &&
+               y1 <= y[idx] && y[idx] < y2;
+    }
+    void averageSets(){
+        int cnt = 1;
+        while(cnt * cnt < N){
+            cnt++;
+        }
+        int length = H / cnt;
+        // 14まで
+        vector<bool> used(N, false);
+        vector<bool> ok(cnt * cnt, false);
+        for(int i = 0; i < cnt; i++){
+            for(int j = 0; j < cnt; j++){
+                int sx = i*length;
+                int sy = j*length;
+                rep(idx, N){
+                    if(used[idx])continue;
+                    if(check(sx, sy, sx+length, sy+length, idx)){
+                        squareSet(sx, sy, length, idx);
+                        ok[i*cnt + j] = true;
+                        used[idx] = true;
+                        break;
+                    }
+                }
+            }
+        }
+        rep(mask, cnt*cnt){
+            int i = mask/cnt;
+            int j = mask%cnt;
+            rep(idx, N){
+                if(not ok[mask] && not used[idx]){
+                    int sx = i * length;
+                    int sy = j * length;
+                    squareSet(sx, sy, length, idx);
+                    used[idx] = true;
+                    ok[mask] = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    // 長方形[x1, x2), [y1, y2)
+    void outSet(int x1, int y1, int x2, int y2, int idx){
+        // cout << x1 << " " << y1 << " " << x2 << " " << y2 << endl;
+        a[idx] = x1;
+        b[idx] = y1;
+        c[idx] = x2;
+        d[idx] = y2;
+    }
+    void outs(){
+        rep(idx,N){
+            cout << a[idx] << " " << b[idx] << " " << c[idx] << " " << d[idx] << endl;
+        }
+    }
+    // 角(x, y),　縦rx, 横ryの長方形
+    void recSet(int x, int y, int rx, int ry, int idx){
+        outSet(x, y, x+rx, y+ry, idx);
+    }
+    // 角(x, y) 長さr0の正方形
+    void squareSet(int x, int y, int r0, int idx){
+        recSet(x, y, r0, r0, idx);
+    }
+    void pointSet(int a, int b, int idx){
+        outSet(a, b, a+1, b+1, idx);
+    }
+    void pointSets(){
+        rep(i,N){
+            pointSet(x[i], y[i], i);
+        }
+    }
+};
 int main() {
-
+    Solver aSolver;
+    aSolver.input();
+    // aSolver.pointOuts(); // 一番簡単
+    aSolver.averageSets();
+    aSolver.outs();
 }
