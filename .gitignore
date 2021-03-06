@@ -2,3 +2,6 @@ tools/target/*
 tools/out/*
 .vscode/*
 tools/target/release
+a.out
+*out*
+tools/out.svg
