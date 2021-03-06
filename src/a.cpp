@@ -76,6 +76,9 @@ struct MyTimer {
 const int H = 10000;
 const int W = 10000;
 
+bool IsIn(int i,int j){
+    return 0 <= i && i < H && 0 <= j && j < W;
+};
 // 長方形
 struct Rect{
     ll x1;
@@ -250,9 +253,34 @@ public:
             setSquareGreedy(idx);
         }
     }
-    // 
     void setSquareGreedy(int idx){
-
+        auto check = [&](int mid) -> bool{
+            Rect tmp = out[idx];
+            tmp.x1 -= mid;
+            tmp.x2 += mid;
+            tmp.y1 -= mid;
+            tmp.y2 += mid;
+            if(not IsIn(tmp.x1, tmp.y1) || not IsIn(tmp.x2, tmp.y2)){
+                return false;
+            }
+            rep(j,N){
+                if(j == idx)continue;
+                if(intersect(tmp, out[j]))return false;
+            }
+            if(tmp.size() > r[idx])return false;
+            return true;
+        };
+        int ok = 0;
+        int ng = W;
+        while(ng - ok > 1){
+            int mid = (ok + ng) / 2;
+            if(check(mid))ok = mid;
+            else ng = mid;
+        }
+        out[idx].x1 -= ok;
+        out[idx].x2 += ok;
+        out[idx].y1 -= ok;
+        out[idx].y2 += ok;
     }
     // 長方形[x1, x2), [y1, y2)
     void outSet(int x1, int y1, int x2, int y2, int idx){
@@ -284,8 +312,8 @@ int main() {
     Solver aSolver;
     aSolver.input();
     // aSolver.pointSets(); // 一番簡単
-    aSolver.averageSets(); // 大きさ考慮してないのでダメダメ。21.8 million点
-    // aSolver.HogeSets();
+    // aSolver.averageSets(); // 大きさ考慮してないのでダメダメ。21.8 million点
+    aSolver.HogeSets();
     // dump(aSolver.calcScore());
     aSolver.outPut();
 }
