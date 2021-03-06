@@ -249,17 +249,65 @@ public:
 
     void HogeSets(){
         pointSets();
-        rep(idx,N){
-            setSquareGreedy(idx);
+        vector<int> idxes;
+        rep(i,N)idxes.push_back(i);
+        sort(all(idxes), [&](int i, int j){
+            return r[i] < r[j];
+        });
+        for(auto &idx: idxes){
+            setGreedyXY(idx);
+        }
+        for(auto &idx: idxes){
+            setGreedyX(idx);
+        }
+        for(auto &idx: idxes){
+            setGreedyY(idx);
+        }
+        for(auto &idx: idxes){
+            setGreedyX1(idx);
+            setGreedyX2(idx);
+        }
+        for(auto &idx: idxes){
+            setGreedyY1(idx);
+            setGreedyY2(idx);
         }
     }
-    void setSquareGreedy(int idx){
+    void setGreedyXY(int idx){
+        setGreedy(idx, true);
+    }
+    void setGreedyX(int idx){
+        setGreedy(idx, false);
+    }
+    void setGreedyY(int idx){
+        swapXYofOut();
+        setGreedyX(idx);
+        swapXYofOut();
+    }
+    void setGreedyX1(int idx){
+        setGreedy(idx, false, true, false);
+    }
+    void setGreedyX2(int idx){
+        setGreedy(idx, false, false, true);
+    }
+    void setGreedyY1(int idx){
+        swapXYofOut();
+        setGreedy(idx, false, true, false);
+        swapXYofOut();
+    }
+    void setGreedyY2(int idx){
+        swapXYofOut();
+        setGreedy(idx, false, false, true);
+        swapXYofOut();
+    }
+    void setGreedy(int idx, bool Ytoo = false, bool one = true, bool two = true){
         auto check = [&](int mid) -> bool{
             Rect tmp = out[idx];
-            tmp.x1 -= mid;
-            tmp.x2 += mid;
-            tmp.y1 -= mid;
-            tmp.y2 += mid;
+            if(one)tmp.x1 -= mid;
+            if(two)tmp.x2 += mid;
+            if(Ytoo){
+                if(one)tmp.y1 -= mid;
+                if(two)tmp.y2 += mid;
+            }
             if(not IsIn(tmp.x1, tmp.y1) || not IsIn(tmp.x2, tmp.y2)){
                 return false;
             }
@@ -277,10 +325,17 @@ public:
             if(check(mid))ok = mid;
             else ng = mid;
         }
-        out[idx].x1 -= ok;
-        out[idx].x2 += ok;
-        out[idx].y1 -= ok;
-        out[idx].y2 += ok;
+        if(one)out[idx].x1 -= ok;
+        if(two)out[idx].x2 += ok;
+        if(Ytoo){
+            if(one)out[idx].y1 -= ok;
+            if(two)out[idx].y2 += ok;
+        }
+    }
+    void swapXYofOut(){
+        rep(i,N){
+            out[i] = Rect{out[i].y1, out[i].x1, out[i].y2, out[i].x2};
+        }
     }
     // 長方形[x1, x2), [y1, y2)
     void outSet(int x1, int y1, int x2, int y2, int idx){
