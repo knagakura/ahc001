@@ -76,21 +76,38 @@ struct MyTimer {
 const int H = 10000;
 const int W = 10000;
 
+// 長方形
+struct Rect{
+    ll x1;
+    ll y1;
+    ll x2;
+    ll y2;
+
+    ll size(){
+        return (x2 - x1) * (y2 - y1);
+    }
+    friend std::ostream& operator<<(std::ostream& os, const Rect& a){
+        os << a.x1 << " " << a.y1 << " " << a.x2 << " " << a.y2;
+        return os;
+    }
+};
+bool intersect(const Rect &a, const Rect &b){
+    return min(a.x2, b.x2) > max(a.x1, b.x1) && min(a.y2, b.y2) > max(a.y1, b.y1);
+}
+
 class Solver{
 public:
     int N;
-    vector<int> x, y, r;
-    vector<int> a, b, c, d;
+    vector<int> x, y;
+    vector<long long> r;
+    vector<Rect> out;
     Solver(){}
     void input(){
         cin >> N;
         x.resize(N);
         y.resize(N);
         r.resize(N);
-        a.resize(N);
-        b.resize(N);
-        c.resize(N);
-        d.resize(N);
+        out.resize(N);
         rep(i,N){
             cin >> x[i] >> y[i] >> r[i];
         }
@@ -99,6 +116,45 @@ public:
         return x1 <= x[idx] && x[idx] < x2 &&
                y1 <= y[idx] && y[idx] < y2;
     }
+    // pub fn score(input: &Input, out: &Vec<Rect>) -> i64 {
+    //     let n = input.ps.len();
+    //     let mut score = 0.0;
+    //     for i in 0..n {
+    //         if out[i].x1 < 0 || out[i].x2 > W || out[i].y1 < 0 || out[i].y2 > W {
+    //             eprintln!("rectangle {} is out of range", i);
+    //             return 0;
+    //         }
+    //         if out[i].x1 >= out[i].x2 || out[i].y1 >= out[i].y2 {
+    //             eprintln!("rectangle {} does not have positive area", i);
+    //             return 0;
+    //         }
+    //         if !(out[i].x1 <= input.ps[i].0 && input.ps[i].0 < out[i].x2 && out[i].y1 <= input.ps[i].1 && input.ps[i].1 < out[i].y2) {
+    //             eprintln!("rectangle {} does not contain point {}", i, i);
+    //             continue;
+    //         }
+    //         for j in 0..i {
+    //             if intersect(&out[i], &out[j]) {
+    //                 eprintln!("rectangles {} and {} overlap", j, i);
+    //                 return 0;
+    //             }
+    //         }
+    //         let s = out[i].size().min(input.size[i]) as f64 / out[i].size().max(input.size[i]) as f64;
+    //         score += 1.0 - (1.0 - s) * (1.0 - s);
+    //     }
+    //     (1e9 * score / n as f64).round() as i64
+    // }
+    // long long calcScore(){
+    //     float score = 0.0;
+    //     rep(i,N){
+    //         long long s = ll(c[i]-a[i])*ll(d[i]-b[i]);
+    //         long double tmp = (long double)(min(r[i], s)) / (long double)(max(r[i], s));
+    //         dump(s);
+    //         dump(tmp);
+    //         score += (long double)1.0f - (long double)((long double)1.0f - tmp) * (long double)((long double)1.0f - tmp);
+    //         dump(score);
+    //     }
+    //     return (long long)(round((long double)1e9 * score) / (long double)(N));
+    // }
     void averageSets(){
         int cnt = 1;
         while(cnt * cnt < N){
@@ -116,7 +172,6 @@ public:
             rep(idx, N){
                 if(used[idx])continue;
                 if(check(sx, sy, sx+length, sy+length, idx)){
-                    dump(length * length, r[idx], length * length - r[idx]);;
                     squareSet(sx, sy, length, idx);
                     ok[mask] = true;
                     sq2Com[mask] = idx;
@@ -189,17 +244,27 @@ public:
         */
     }
 
+    void HogeSets(){
+        pointSets();
+        rep(idx,N){
+            // 縦の長さを固定すると、横にどのくらい伸ばせるかが決まる
+            for(int ax = 0; ax < H; ax++){
+                // [a, c+ax], [b, d+ay]
+            }
+        }
+    }
     // 長方形[x1, x2), [y1, y2)
     void outSet(int x1, int y1, int x2, int y2, int idx){
         // cout << x1 << " " << y1 << " " << x2 << " " << y2 << endl;
-        a[idx] = x1;
-        b[idx] = y1;
-        c[idx] = x2;
-        d[idx] = y2;
+        out[idx] = Rect({x1, y1, x2, y2});
+        // a[idx] = x1;
+        // b[idx] = y1;
+        // c[idx] = x2;
+        // d[idx] = y2;
     }
     void outs(){
         rep(idx,N){
-            cout << a[idx] << " " << b[idx] << " " << c[idx] << " " << d[idx] << endl;
+            cout << out[idx] << endl;
         }
     }
     // 角(x, y),　縦rx, 横ryの長方形
@@ -222,7 +287,9 @@ public:
 int main() {
     Solver aSolver;
     aSolver.input();
-    // aSolver.pointOuts(); // 一番簡単
-    aSolver.averageSets();
+    // aSolver.pointSets(); // 一番簡単
+    aSolver.averageSets(); // 大きさ考慮してないのでダメダメ。21.8 million点
+    // aSolver.HogeSets();
+    // dump(aSolver.calcScore());
     aSolver.outs();
 }
