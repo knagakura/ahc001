@@ -102,6 +102,7 @@ public:
             rep(idx, N){
                 if(used[idx])continue;
                 if(check(sx, sy, sx+length, sy+length, idx)){
+                    dump(length * length, r[idx], length * length - r[idx]);;
                     squareSet(sx, sy, length, idx);
                     ok[mask] = true;
                     sq2Com[mask] = idx;
@@ -125,6 +126,7 @@ public:
                 }
             }
         }
+        /*
         vector<int> lengthenDir(cnt * cnt, -1);
         rep(mask, cnt*cnt){
             int i = mask/cnt;
@@ -170,6 +172,7 @@ public:
                 }
             }
         }
+        */
     }
 
     // 長方形[x1, x2), [y1, y2)
