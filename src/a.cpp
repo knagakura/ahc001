@@ -262,7 +262,7 @@ public:
         // c[idx] = x2;
         // d[idx] = y2;
     }
-    void outs(){
+    void outPut(){
         rep(idx,N){
             cout << out[idx] << endl;
         }
@@ -291,5 +291,5 @@ int main() {
     aSolver.averageSets(); // 大きさ考慮してないのでダメダメ。21.8 million点
     // aSolver.HogeSets();
     // dump(aSolver.calcScore());
-    aSolver.outs();
+    aSolver.outPut();
 }
