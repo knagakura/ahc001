@@ -44,7 +44,6 @@ const long double PI = acos(-1.0);
 
 const int dx[8] = {1, 0, -1, 0, 1, -1, -1, 1};
 const int dy[8] = {0, 1, 0, -1, 1, 1, -1, -1};
-const string dir = "DRUL";
 
 uint32_t XorShift(void) {
     static uint32_t x = 123456789;
@@ -72,7 +71,7 @@ struct MyTimer {
             __asm__ volatile ("rdtsc" : "=a" (low), "=d" (high));
             return ((long long) low) | ((long long) high << 32);
     }
-};
+}aMyTimer;
 const int H = 10000;
 const int W = 10000;
 
@@ -85,7 +84,7 @@ struct Rect{
     ll y1;
     ll x2;
     ll y2;
-
+    int idx;
     ll size(){
         return (x2 - x1) * (y2 - y1);
     }
@@ -246,9 +245,47 @@ public:
         }
         */
     }
-
+    bool checkIn(const Rect &a){
+        return a.x1 <= x[a.idx] && x[a.idx] < a.x2 && 
+        a.y1 <= y[a.idx] && y[a.idx] < a.y2;
+    }
+    void RandomMove(){
+        while(true){
+            int idx = XorShift()%N;
+            ll ddx = out[idx].x2 - out[idx].x1;
+            ll ddy = out[idx].y2 - out[idx].y1;
+            int diff = XorShift()%100+3;
+            int dir = XorShift() % 4;
+            auto tmp = out[idx];
+            tmp.x1 += diff * dx[dir];
+            if(XorShift()%2)tmp.x2 += diff * dx[dir];
+            tmp.y1 += diff * dy[dir];
+            if(XorShift()%2)tmp.y2 += diff * dy[dir];
+            if(tmp.size() > out[idx].size())continue;
+            // if(not isValidMove(tmp))continue;
+            if(not IsIn(tmp.x1, tmp.y1) || not IsIn(tmp.x2, tmp.y2)){
+                continue;
+            }
+            if(not checkIn(tmp)){
+                continue;
+            }
+            bool ok = true;
+            rep(j,N){
+                if(j == idx)continue;
+                if(intersect(tmp, out[j])){
+                    ok = false;
+                    break;
+                }
+            }
+            if(not ok)continue;
+            if(ok){
+                swap(out[idx], tmp);
+                break;
+            }
+        }
+    }
     void HogeSets(){
-        pointSets();
+        // pointSets();
         vector<int> idxes;
         rep(i,N)idxes.push_back(i);
         sort(all(idxes), [&](int i, int j){
@@ -299,6 +336,16 @@ public:
         setGreedy(idx, false, false, true);
         swapXYofOut();
     }
+    bool isValidMove(const Rect &a){
+        if(not IsIn(a.x1, a.y1) || not IsIn(a.x2, a.y2)){
+            return false;
+        }
+        rep(j,N){
+            if(j == a.idx)continue;
+            if(intersect(a, out[j]))return false;
+        }
+        return true;
+    }
     void setGreedy(int idx, bool Ytoo = false, bool one = true, bool two = true){
         auto check = [&](int mid) -> bool{
             Rect tmp = out[idx];
@@ -334,12 +381,12 @@ public:
     }
     void swapXYofOut(){
         rep(i,N){
-            out[i] = Rect{out[i].y1, out[i].x1, out[i].y2, out[i].x2};
+            out[i] = Rect{out[i].y1, out[i].x1, out[i].y2, out[i].x2, out[i].idx};
         }
     }
     // 長方形[x1, x2), [y1, y2)
     void outSet(int x1, int y1, int x2, int y2, int idx){
-        out[idx] = Rect({x1, y1, x2, y2});
+        out[idx] = Rect({x1, y1, x2, y2, idx});
     }
     void outPut(){
         rep(idx,N){
@@ -364,11 +411,18 @@ public:
     }
 };
 int main() {
+    aMyTimer.reset();
     Solver aSolver;
     aSolver.input();
-    // aSolver.pointSets(); // 一番簡単
+    aSolver.pointSets(); // 一番簡単
     // aSolver.averageSets(); // 大きさ考慮してないのでダメダメ。21.8 million点
     aSolver.HogeSets();
+    while(aMyTimer.get() < 5){
+        aSolver.RandomMove();
+        aSolver.HogeSets();
+    }
+    aSolver.HogeSets();
     // dump(aSolver.calcScore());
+    dump(aMyTimer.get());
     aSolver.outPut();
 }
