@@ -254,13 +254,14 @@ public:
             int idx = XorShift()%N;
             ll ddx = out[idx].x2 - out[idx].x1;
             ll ddy = out[idx].y2 - out[idx].y1;
-            int diff = XorShift()%100+3;
-            int dir = XorShift() % 4;
+            int diffX = XorShift()%100+3;
+            int diffY = XorShift()%100+3;
+            int dir = XorShift() % 8;
             auto tmp = out[idx];
-            tmp.x1 += diff * dx[dir];
-            if(XorShift()%2)tmp.x2 += diff * dx[dir];
-            tmp.y1 += diff * dy[dir];
-            if(XorShift()%2)tmp.y2 += diff * dy[dir];
+            tmp.x1 += diffX * dx[dir];
+            if(XorShift()%2)tmp.x2 += diffX * dx[dir];
+            tmp.y1 += diffY * dy[dir];
+            if(XorShift()%2)tmp.y2 += diffY * dy[dir];
             if(tmp.size() > out[idx].size())continue;
             // if(not isValidMove(tmp))continue;
             if(not IsIn(tmp.x1, tmp.y1) || not IsIn(tmp.x2, tmp.y2)){
