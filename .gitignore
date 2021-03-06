@@ -1,0 +1,4 @@
+tools/target/*
+tools/out/*
+.vscode/*
+tools/target/release
