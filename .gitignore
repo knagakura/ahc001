@@ -1,5 +1,6 @@
 tools/target/*
 tools/out/*
+tools/*
 .vscode/*
 tools/target/release
 a.out
