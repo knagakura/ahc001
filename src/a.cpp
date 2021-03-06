@@ -247,20 +247,16 @@ public:
     void HogeSets(){
         pointSets();
         rep(idx,N){
-            // 縦の長さを固定すると、横にどのくらい伸ばせるかが決まる
-            for(int ax = 0; ax < H; ax++){
-                // [a, c+ax], [b, d+ay]
-            }
+            setSquareGreedy(idx);
         }
+    }
+    // 
+    void setSquareGreedy(int idx){
+
     }
     // 長方形[x1, x2), [y1, y2)
     void outSet(int x1, int y1, int x2, int y2, int idx){
-        // cout << x1 << " " << y1 << " " << x2 << " " << y2 << endl;
         out[idx] = Rect({x1, y1, x2, y2});
-        // a[idx] = x1;
-        // b[idx] = y1;
-        // c[idx] = x2;
-        // d[idx] = y2;
     }
     void outPut(){
         rep(idx,N){
