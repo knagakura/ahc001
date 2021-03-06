@@ -1,13 +1,14 @@
 import subprocess
 import os
-
+import sys
 def runShell(s):
     print(s)
     subprocess.run(s, shell=True)
 
 
 # cppFile = input()
-cppFile = "./src/a.cpp"
+print(sys.argv)
+cppFile = sys.argv[1]
 compile = "g++-9 -O2 -std=gnu++17 -Wall -Wextra -Wshadow -DDEBUG {}".format(cppFile)
 
 print(runShell("pwd"))
