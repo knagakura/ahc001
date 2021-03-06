@@ -2,7 +2,6 @@ import subprocess
 import os
 
 def runShell(s):
-    print(s)
     subprocess.run(s, shell=True)
 
 
