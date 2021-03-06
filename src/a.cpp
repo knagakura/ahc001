@@ -42,11 +42,10 @@ const ll MOD = 1000000007;
 // const ll MOD = 998244353;
 const long double PI = acos(-1.0);
 
-/*
 const int dx[8] = {1, 0, -1, 0, 1, -1, -1, 1};
 const int dy[8] = {0, 1, 0, -1, 1, 1, -1, -1};
 const string dir = "DRUL";
-*/
+
 uint32_t XorShift(void) {
     static uint32_t x = 123456789;
     static uint32_t y = 362436069;
@@ -95,18 +94,19 @@ public:
         // 14まで
         vector<bool> used(N, false);
         vector<bool> ok(cnt * cnt, false);
-        for(int i = 0; i < cnt; i++){
-            for(int j = 0; j < cnt; j++){
-                int sx = i*length;
-                int sy = j*length;
-                rep(idx, N){
-                    if(used[idx])continue;
-                    if(check(sx, sy, sx+length, sy+length, idx)){
-                        squareSet(sx, sy, length, idx);
-                        ok[i*cnt + j] = true;
-                        used[idx] = true;
-                        break;
-                    }
+        vector<int> sq2Com(cnt*cnt, -1);
+        rep(i,cnt)rep(j,cnt){
+            int sx = i*length;
+            int sy = j*length;
+            int mask = i * cnt + j;
+            rep(idx, N){
+                if(used[idx])continue;
+                if(check(sx, sy, sx+length, sy+length, idx)){
+                    squareSet(sx, sy, length, idx);
+                    ok[mask] = true;
+                    sq2Com[mask] = idx;
+                    used[idx] = true;
+                    break;
                 }
             }
         }
@@ -120,7 +120,53 @@ public:
                     squareSet(sx, sy, length, idx);
                     used[idx] = true;
                     ok[mask] = true;
+                    sq2Com[mask] = idx;
                     break;
+                }
+            }
+        }
+        vector<int> lengthenDir(cnt * cnt, -1);
+        rep(mask, cnt*cnt){
+            int i = mask/cnt;
+            int j = mask%cnt;
+            if(not ok[mask]){
+                rep(k,4){
+                    int ni = i + dx[k];
+                    int nj = j + dy[k];
+                    int nmask = ni * cnt + nj;
+                    if(0 <= ni && ni < cnt && 0 <= nj && nj < cnt){
+                        if(ok[nmask]){
+                            if(lengthenDir[nmask] == -1 || lengthenDir[nmask] == k%2){
+                                // 元々一緒だった会社はどこか
+                                int comIdx = sq2Com[nmask];
+                                // const int dx[8] = {1, 0, -1, 0, 1, -1, -1, 1};
+                                // const int dy[8] = {0, 1, 0, -1, 1, 1, -1, -1};
+                                // 下とマージ
+                                if(k == 0){
+                                    recSet(a[comIdx]-length, b[comIdx], c[comIdx]-a[comIdx]+length, d[comIdx]-b[comIdx], comIdx);
+                                    lengthenDir[nmask] = lengthenDir[mask] = k%2;
+                                }
+                                // 右とマージ
+                                if(k == 1){
+                                    recSet(a[comIdx], b[comIdx]-length, c[comIdx]-a[comIdx], d[comIdx]-b[comIdx]+length, comIdx);
+                                    lengthenDir[nmask] = lengthenDir[mask] = k%2;
+                                }
+                                // 上とマージ
+                                if(k == 2){
+                                    recSet(a[comIdx], b[comIdx], c[comIdx]-a[comIdx]+length, d[comIdx]-b[comIdx], comIdx);
+                                    lengthenDir[nmask] = lengthenDir[mask] = k%2;
+                                }
+                                // 左とマージ
+                                if(k == 3){
+                                    recSet(a[comIdx], b[comIdx], c[comIdx]-a[comIdx], d[comIdx]-b[comIdx]+length, comIdx);
+                                    lengthenDir[nmask] = lengthenDir[mask] = k%2;
+                                }
+                                sq2Com[mask] = comIdx;
+                                ok[mask] = true;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
