@@ -58,7 +58,21 @@ uint32_t XorShift(void) {
     return w = (w ^ (w >> 19)) ^ (t ^ (t >> 8));
 }
 
+constexpr double TL = 5.00;
+constexpr long long CYCLES_PER_SEC = 2800000000;
+struct MyTimer {
+    long long start;
+    MyTimer() { reset(); }
+ 
+    void reset() { start = getCycle(); }
+        inline double get() { return (double) (getCycle() - start) / CYCLES_PER_SEC; }
 
+        inline long long getCycle() {
+            unsigned low, high;
+            __asm__ volatile ("rdtsc" : "=a" (low), "=d" (high));
+            return ((long long) low) | ((long long) high << 32);
+    }
+};
 const int H = 10000;
 const int W = 10000;
 
