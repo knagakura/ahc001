@@ -86,7 +86,16 @@ struct Rect{
     ll y2;
     int idx;
     ll size(){
-        return (x2 - x1) * (y2 - y1);
+        return lenx() * leny();
+    }
+    ll ratio(){
+        return max(lenx(), leny()) / min(lenx(), leny());
+    }
+    ll lenx(){
+        return (x2 - x1);
+    }
+    ll leny(){
+        return (y2 - y1);
     }
     friend std::ostream& operator<<(std::ostream& os, const Rect& a){
         os << a.x1 << " " << a.y1 << " " << a.x2 << " " << a.y2;
@@ -410,6 +419,31 @@ public:
             pointSet(x[i], y[i], i);
         }
     }
+    void debug(){
+        for(Rect &a: out){
+            dump(a.idx, a.x2 - a.x1, a.y2 - a.y1, a.size(), r[a.idx], a.ratio());
+        }
+    }
+    void pointReset(int idx){
+        pointSet(x[out[idx].idx], y[out[idx].idx], out[idx].idx);
+    }
+    void ratioSet(int idx){
+        if(out[idx].ratio() > 10){
+            if(out[idx].lenx() > out[idx].leny()){
+                pointReset(idx);
+                setGreedyY(idx);
+                setGreedyX(idx);
+            }
+            else{
+                pointReset(idx);
+                setGreedyX(idx);
+                setGreedyY(idx);
+            }
+        }
+    }
+    void ratioSets(){
+        rep(idx, N)ratioSet(idx);
+    }
 };
 int main() {
     aMyTimer.reset();
@@ -421,9 +455,13 @@ int main() {
     while(aMyTimer.get() < 5){
         aSolver.RandomMove();
         aSolver.HogeSets();
+        // if(aSolver.N < 70){
+        //     aSolver.ratioSets();
+        // }
     }
     aSolver.HogeSets();
     // dump(aSolver.calcScore());
     dump(aMyTimer.get());
+    aSolver.debug();
     aSolver.outPut();
 }
