@@ -127,33 +127,6 @@ public:
         return x1 <= x[idx] && x[idx] < x2 &&
                y1 <= y[idx] && y[idx] < y2;
     }
-    // pub fn score(input: &Input, out: &Vec<Rect>) -> i64 {
-    //     let n = input.ps.len();
-    //     let mut score = 0.0;
-    //     for i in 0..n {
-    //         if out[i].x1 < 0 || out[i].x2 > W || out[i].y1 < 0 || out[i].y2 > W {
-    //             eprintln!("rectangle {} is out of range", i);
-    //             return 0;
-    //         }
-    //         if out[i].x1 >= out[i].x2 || out[i].y1 >= out[i].y2 {
-    //             eprintln!("rectangle {} does not have positive area", i);
-    //             return 0;
-    //         }
-    //         if !(out[i].x1 <= input.ps[i].0 && input.ps[i].0 < out[i].x2 && out[i].y1 <= input.ps[i].1 && input.ps[i].1 < out[i].y2) {
-    //             eprintln!("rectangle {} does not contain point {}", i, i);
-    //             continue;
-    //         }
-    //         for j in 0..i {
-    //             if intersect(&out[i], &out[j]) {
-    //                 eprintln!("rectangles {} and {} overlap", j, i);
-    //                 return 0;
-    //             }
-    //         }
-    //         let s = out[i].size().min(input.size[i]) as f64 / out[i].size().max(input.size[i]) as f64;
-    //         score += 1.0 - (1.0 - s) * (1.0 - s);
-    //     }
-    //     (1e9 * score / n as f64).round() as i64
-    // }
     long long calcScore(){
         long double score = 0.0;
         rep(i,N){
