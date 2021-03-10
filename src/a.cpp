@@ -101,6 +101,9 @@ struct Rect{
         os << a.x1 << " " << a.y1 << " " << a.x2 << " " << a.y2;
         return os;
     }
+    bool operator<(const Rect& b){
+        return x1 < b.x1;
+    }
 };
 bool intersect(const Rect &a, const Rect &b){
     return min(a.x2, b.x2) > max(a.x1, b.x1) && min(a.y2, b.y2) > max(a.y1, b.y1);
@@ -127,12 +130,16 @@ public:
         return x1 <= x[idx] && x[idx] < x2 &&
                y1 <= y[idx] && y[idx] < y2;
     }
-    long long calcScore(){
+    long double calcScore(int idx){
+        long long s = out[idx].size();
+        long double tmp = (long double)(min(r[idx], s)) / (long double)(max(r[idx], s));
+        long double res = (long double)1.0f - (long double)((long double)1.0f - tmp) * (long double)((long double)1.0f - tmp);
+        return res;
+    }
+    long long calcScoreAll(){
         long double score = 0.0;
         rep(i,N){
-            long long s = out[i].size();
-            long double tmp = (long double)(min(r[i], s)) / (long double)(max(r[i], s));
-            score += (long double)1.0f - (long double)((long double)1.0f - tmp) * (long double)((long double)1.0f - tmp);
+            score += calcScore(i);
         }
         return (long long)(round((long double)1e9 * score) / (long double)(N));
     }
@@ -260,6 +267,7 @@ public:
             if(not ok)continue;
             if(ok){
                 swap(out[idx], tmp);
+                if(XorShift()%100 < 20)pointSet(idx);
                 break;
             }
         }
@@ -274,19 +282,29 @@ public:
         for(auto &idx: idxes){
             setGreedyXY(idx);
         }
+        bool f  = XorShift()%2;
         for(auto &idx: idxes){
+            if(f)swapXYofOut();
             setGreedyX(idx);
+            if(f)swapXYofOut();
         }
         for(auto &idx: idxes){
+            if(f)swapXYofOut();
             setGreedyY(idx);
+            if(f)swapXYofOut();
         }
+        f = XorShift()%2;
         for(auto &idx: idxes){
+            if(f)swapXYofOut();
             setGreedyX1(idx);
             setGreedyX2(idx);
+            if(f)swapXYofOut();
         }
         for(auto &idx: idxes){
+            if(f)swapXYofOut();
             setGreedyY1(idx);
             setGreedyY2(idx);
+            if(f)swapXYofOut();
         }
     }
     void setGreedyXY(int idx){
@@ -384,6 +402,9 @@ public:
     void pointSet(int a, int b, int idx){
         outSet(a, b, a+1, b+1, idx);
     }
+    void pointSet(int idx){
+        pointSet(x[idx], y[idx], idx);
+    }
     void pointSets(){
         rep(i,N){
             pointSet(x[i], y[i], i);
@@ -423,8 +444,12 @@ int main() {
     // aSolver.averageSets(); // 大きさ考慮してないのでダメダメ。21.8 million点
     aSolver.HogeSets();
     while(aMyTimer.get() < 5){
+        auto tSolver = aSolver;
         aSolver.RandomMove();
         aSolver.HogeSets();
+        if(tSolver.calcScoreAll() > aSolver.calcScoreAll()){
+            swap(tSolver, aSolver);
+        }
         // if(aSolver.N < 70){
         //     aSolver.ratioSets();
         // }
