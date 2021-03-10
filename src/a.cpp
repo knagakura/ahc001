@@ -286,6 +286,11 @@ public:
             });
         }
         for(auto &idx: idxes){
+            if(out[idx].ratio() > 20 && XorShift() % 100 < 20){
+                pointSet(idx);
+            }
+        }
+        for(auto &idx: idxes){
             setGreedyXY(idx);
         }
         bool f  = XorShift()%2;
