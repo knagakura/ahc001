@@ -293,29 +293,66 @@ public:
         for(auto &idx: idxes){
             setGreedyXY(idx);
         }
+        // bool f  = XorShift()%2;
+        // for(auto &idx: idxes){
+        //     if(f)swapXYofOut();
+        //     setGreedyX(idx);
+        //     if(f)swapXYofOut();
+        // }
+        // for(auto &idx: idxes){
+        //     if(f)swapXYofOut();
+        //     setGreedyY(idx);
+        //     if(f)swapXYofOut();
+        // }
+        // f = XorShift()%2;
+        // for(auto &idx: idxes){
+        //     if(f)swapXYofOut();
+        //     setGreedyX1(idx);
+        //     setGreedyX2(idx);
+        //     if(f)swapXYofOut();
+        // }
+        // for(auto &idx: idxes){
+        //     if(f)swapXYofOut();
+        //     setGreedyY1(idx);
+        //     setGreedyY2(idx);
+        //     if(f)swapXYofOut();
+        // }
         bool f  = XorShift()%2;
-        for(auto &idx: idxes){
-            if(f)swapXYofOut();
-            setGreedyX(idx);
-            if(f)swapXYofOut();
+        if(f){
+            for(auto &idx: idxes){
+                setGreedyY(idx);
+            }
+            for(auto &idx: idxes){
+                setGreedyX(idx);
+            }
         }
-        for(auto &idx: idxes){
-            if(f)swapXYofOut();
-            setGreedyY(idx);
-            if(f)swapXYofOut();
+        else{
+            for(auto &idx: idxes){
+                setGreedyX(idx);
+            }
+            for(auto &idx: idxes){
+                setGreedyY(idx);
+            }
         }
-        f = XorShift()%2;
-        for(auto &idx: idxes){
-            if(f)swapXYofOut();
-            setGreedyX1(idx);
-            setGreedyX2(idx);
-            if(f)swapXYofOut();
-        }
-        for(auto &idx: idxes){
-            if(f)swapXYofOut();
-            setGreedyY1(idx);
-            setGreedyY2(idx);
-            if(f)swapXYofOut();
+        f  = XorShift()%2;
+        if(f){
+            for(auto &idx: idxes){
+                setGreedyY1(idx);
+                setGreedyY2(idx);
+            }
+            for(auto &idx: idxes){
+                setGreedyX1(idx);
+                setGreedyX2(idx);
+            }
+        }else{
+            for(auto &idx: idxes){
+                setGreedyX1(idx);
+                setGreedyX2(idx);
+            }
+            for(auto &idx: idxes){
+                setGreedyY1(idx);
+                setGreedyY2(idx);
+            }
         }
     }
     void setGreedyXY(int idx){
@@ -364,6 +401,7 @@ public:
                 if(one)tmp.y1 -= mid;
                 if(two)tmp.y2 += mid;
             }
+            if(tmp.size() > r[idx])return false;
             if(not IsIn(tmp.x1, tmp.y1) || not IsIn(tmp.x2, tmp.y2)){
                 return false;
             }
@@ -371,9 +409,11 @@ public:
                 if(j == idx)continue;
                 if(intersect(tmp, out[j]))return false;
             }
-            if(tmp.size() > r[idx])return false;
             return true;
         };
+        if(!check(1)){
+            return;
+        }
         int ok = 0;
         int ng = W;
         while(ng - ok > 1){
@@ -462,7 +502,7 @@ int main() {
         if(tSolver.calcScoreAll() > aSolver.calcScoreAll()){
             swap(tSolver, aSolver);
         }
-        if(itr % 100 == 0){
+        if(itr % 1000 == 0){
             dump(itr, aMyTimer.get(), aSolver.calcScoreAll());
         }
         // if(aSolver.N < 70){
