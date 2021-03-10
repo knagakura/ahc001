@@ -236,7 +236,9 @@ public:
         a.y1 <= y[a.idx] && y[a.idx] < a.y2;
     }
     void RandomMove(){
-        while(true){
+        int cnt = 20;
+        int itr = 0;
+        while(itr < cnt){
             int idx = XorShift()%N;
             ll ddx = out[idx].x2 - out[idx].x1;
             ll ddy = out[idx].y2 - out[idx].y1;
@@ -268,7 +270,8 @@ public:
             if(ok){
                 swap(out[idx], tmp);
                 if(XorShift()%100 < 20)pointSet(idx);
-                break;
+                itr++;
+                // break;
             }
         }
     }
