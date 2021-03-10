@@ -395,8 +395,5 @@ int main() {
         itr++;
     }
     aSolver.HogeSets();
-    // dump(aSolver.calcScore());
-    dump(aMyTimer.get());
-    aSolver.debug();
     aSolver.outPut();
 }
