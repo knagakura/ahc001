@@ -272,13 +272,19 @@ public:
             }
         }
     }
-    void HogeSets(){
+    void HogeSets(bool shuffle = false){
         // pointSets();
         vector<int> idxes;
         rep(i,N)idxes.push_back(i);
-        sort(all(idxes), [&](int i, int j){
-            return r[i] < r[j];
-        });
+        if(shuffle){
+            std::mt19937_64 mt;
+            std::shuffle(all(idxes), mt);
+        }
+        else{
+            sort(all(idxes), [&](int i, int j){
+                return r[i] < r[j];
+            });
+        }
         for(auto &idx: idxes){
             setGreedyXY(idx);
         }
@@ -446,7 +452,7 @@ int main() {
     while(aMyTimer.get() < 5){
         auto tSolver = aSolver;
         aSolver.RandomMove();
-        aSolver.HogeSets();
+        aSolver.HogeSets(true);
         if(tSolver.calcScoreAll() > aSolver.calcScoreAll()){
             swap(tSolver, aSolver);
         }
