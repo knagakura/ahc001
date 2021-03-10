@@ -154,18 +154,15 @@ public:
     //     }
     //     (1e9 * score / n as f64).round() as i64
     // }
-    // long long calcScore(){
-    //     float score = 0.0;
-    //     rep(i,N){
-    //         long long s = ll(c[i]-a[i])*ll(d[i]-b[i]);
-    //         long double tmp = (long double)(min(r[i], s)) / (long double)(max(r[i], s));
-    //         dump(s);
-    //         dump(tmp);
-    //         score += (long double)1.0f - (long double)((long double)1.0f - tmp) * (long double)((long double)1.0f - tmp);
-    //         dump(score);
-    //     }
-    //     return (long long)(round((long double)1e9 * score) / (long double)(N));
-    // }
+    long long calcScore(){
+        long double score = 0.0;
+        rep(i,N){
+            long long s = out[i].size();
+            long double tmp = (long double)(min(r[i], s)) / (long double)(max(r[i], s));
+            score += (long double)1.0f - (long double)((long double)1.0f - tmp) * (long double)((long double)1.0f - tmp);
+        }
+        return (long long)(round((long double)1e9 * score) / (long double)(N));
+    }
     void averageSets(){
         int cnt = 1;
         while(cnt * cnt < N){
