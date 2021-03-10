@@ -244,9 +244,9 @@ public:
             int diffY = XorShift()%100+3;
             int dir = XorShift() % 8;
             auto tmp = out[idx];
-            tmp.x1 += diffX * dx[dir];
+            if(XorShift()%2)tmp.x1 += diffX * dx[dir];
             if(XorShift()%2)tmp.x2 += diffX * dx[dir];
-            tmp.y1 += diffY * dy[dir];
+            if(XorShift()%2)tmp.y1 += diffY * dy[dir];
             if(XorShift()%2)tmp.y2 += diffY * dy[dir];
             if(tmp.size() > out[idx].size())continue;
             // if(not isValidMove(tmp))continue;
@@ -283,6 +283,7 @@ public:
         else{
             sort(all(idxes), [&](int i, int j){
                 return r[i] < r[j];
+                // return make_pair(x[i], y[i]) < make_pair(x[j], y[j]);
             });
         }
         for(auto &idx: idxes){
@@ -293,30 +294,6 @@ public:
         for(auto &idx: idxes){
             setGreedyXY(idx);
         }
-        // bool f  = XorShift()%2;
-        // for(auto &idx: idxes){
-        //     if(f)swapXYofOut();
-        //     setGreedyX(idx);
-        //     if(f)swapXYofOut();
-        // }
-        // for(auto &idx: idxes){
-        //     if(f)swapXYofOut();
-        //     setGreedyY(idx);
-        //     if(f)swapXYofOut();
-        // }
-        // f = XorShift()%2;
-        // for(auto &idx: idxes){
-        //     if(f)swapXYofOut();
-        //     setGreedyX1(idx);
-        //     setGreedyX2(idx);
-        //     if(f)swapXYofOut();
-        // }
-        // for(auto &idx: idxes){
-        //     if(f)swapXYofOut();
-        //     setGreedyY1(idx);
-        //     setGreedyY2(idx);
-        //     if(f)swapXYofOut();
-        // }
         bool f  = XorShift()%2;
         if(f){
             for(auto &idx: idxes){
