@@ -454,6 +454,7 @@ int main() {
     aSolver.pointSets(); // 一番簡単
     // aSolver.averageSets(); // 大きさ考慮してないのでダメダメ。21.8 million点
     aSolver.HogeSets();
+    int itr = 0;
     while(aMyTimer.get() < 5){
         auto tSolver = aSolver;
         aSolver.RandomMove();
@@ -461,9 +462,13 @@ int main() {
         if(tSolver.calcScoreAll() > aSolver.calcScoreAll()){
             swap(tSolver, aSolver);
         }
+        if(itr % 100 == 0){
+            dump(itr, aMyTimer.get(), aSolver.calcScoreAll());
+        }
         // if(aSolver.N < 70){
         //     aSolver.ratioSets();
         // }
+        itr++;
     }
     aSolver.HogeSets();
     // dump(aSolver.calcScore());
