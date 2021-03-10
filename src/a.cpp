@@ -109,23 +109,19 @@ bool intersect(const Rect &a, const Rect &b){
     return min(a.x2, b.x2) > max(a.x1, b.x1) && min(a.y2, b.y2) > max(a.y1, b.y1);
 }
 
+const int MAXN = 222;
 class Solver{
 public:
     int N;
-    vector<int> x, y;
-    vector<long long> r;
-    vector<Rect> out;
-    vector<long long> scores;
+    int x[MAXN], y[MAXN];
+    ll r[MAXN];
+    Rect out[MAXN];
+    ll scores[200];
     Solver(){
         input();
-        scores.resize(N);
     }
     void input(){
         cin >> N;
-        x.resize(N);
-        y.resize(N);
-        r.resize(N);
-        out.resize(N);
         rep(i,N){
             cin >> x[i] >> y[i] >> r[i];
         }
@@ -379,7 +375,7 @@ int main() {
     aSolver.pointSets(); // 一番簡単
     aSolver.HogeSets();
     int itr = 0;
-    while(aMyTimer.get() < 5){
+    while(aMyTimer.get() < 5.3){
         auto tSolver = aSolver;
         aSolver.RandomMove();
         aSolver.HogeSets(true);
