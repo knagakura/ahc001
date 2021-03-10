@@ -115,7 +115,11 @@ public:
     vector<int> x, y;
     vector<long long> r;
     vector<Rect> out;
-    Solver(){}
+    vector<long long> scores;
+    Solver(){
+        input();
+        scores.resize(N);
+    }
     void input(){
         cin >> N;
         x.resize(N);
@@ -336,31 +340,25 @@ public:
         }
     }
     void setGreedyXY(int idx){
-        setGreedy(idx, true);
+        setGreedy(idx, true, true, true, true);
     }
     void setGreedyX(int idx){
-        setGreedy(idx, false);
+        setGreedy(idx, true, true, false, false);
     }
     void setGreedyY(int idx){
-        swapXYofOut();
-        setGreedyX(idx);
-        swapXYofOut();
+        setGreedy(idx, false, false, true, true);
     }
     void setGreedyX1(int idx){
-        setGreedy(idx, false, true, false);
+        setGreedy(idx, true, false, false, false);
     }
     void setGreedyX2(int idx){
-        setGreedy(idx, false, false, true);
+        setGreedy(idx, false, true, false, false);
     }
     void setGreedyY1(int idx){
-        swapXYofOut();
-        setGreedy(idx, false, true, false);
-        swapXYofOut();
+        setGreedy(idx, false, false, true, false);
     }
     void setGreedyY2(int idx){
-        swapXYofOut();
-        setGreedy(idx, false, false, true);
-        swapXYofOut();
+        setGreedy(idx, false, false, false, true);
     }
     bool isValidMove(const Rect &a){
         if(not IsIn(a.x1, a.y1) || not IsIn(a.x2, a.y2)){
@@ -372,15 +370,13 @@ public:
         }
         return true;
     }
-    void setGreedy(int idx, bool Ytoo = false, bool one = true, bool two = true){
+    void setGreedy(int idx, bool x1, bool x2, bool y1, bool y2){
         auto check = [&](int mid) -> bool{
             Rect tmp = out[idx];
-            if(one)tmp.x1 -= mid;
-            if(two)tmp.x2 += mid;
-            if(Ytoo){
-                if(one)tmp.y1 -= mid;
-                if(two)tmp.y2 += mid;
-            }
+            if(x1)tmp.x1 -= mid;
+            if(x2)tmp.x2 += mid;
+            if(y1)tmp.y1 -= mid;
+            if(y2)tmp.y2 += mid;
             if(tmp.size() > r[idx])return false;
             if(not IsIn(tmp.x1, tmp.y1) || not IsIn(tmp.x2, tmp.y2)){
                 return false;
@@ -401,12 +397,10 @@ public:
             if(check(mid))ok = mid;
             else ng = mid;
         }
-        if(one)out[idx].x1 -= ok;
-        if(two)out[idx].x2 += ok;
-        if(Ytoo){
-            if(one)out[idx].y1 -= ok;
-            if(two)out[idx].y2 += ok;
-        }
+        if(x1)out[idx].x1 -= ok;
+        if(x2)out[idx].x2 += ok;
+        if(y1)out[idx].y1 -= ok;
+        if(y2)out[idx].y2 += ok;
     }
     void swapXYofOut(){
         rep(i,N){
@@ -470,7 +464,6 @@ public:
 int main() {
     aMyTimer.reset();
     Solver aSolver;
-    aSolver.input();
     aSolver.pointSets(); // 一番簡単
     // aSolver.averageSets(); // 大きさ考慮してないのでダメダメ。21.8 million点
     aSolver.HogeSets();
