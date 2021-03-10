@@ -147,94 +147,6 @@ public:
         }
         return (long long)(round((long double)1e9 * score) / (long double)(N));
     }
-    void averageSets(){
-        int cnt = 1;
-        while(cnt * cnt < N){
-            cnt++;
-        }
-        int length = H / cnt;
-        // 14まで
-        vector<bool> used(N, false);
-        vector<bool> ok(cnt * cnt, false);
-        vector<int> sq2Com(cnt*cnt, -1);
-        rep(i,cnt)rep(j,cnt){
-            int sx = i*length;
-            int sy = j*length;
-            int mask = i * cnt + j;
-            rep(idx, N){
-                if(used[idx])continue;
-                if(check(sx, sy, sx+length, sy+length, idx)){
-                    squareSet(sx, sy, length, idx);
-                    ok[mask] = true;
-                    sq2Com[mask] = idx;
-                    used[idx] = true;
-                    break;
-                }
-            }
-        }
-        rep(mask, cnt*cnt){
-            int i = mask/cnt;
-            int j = mask%cnt;
-            rep(idx, N){
-                if(not ok[mask] && not used[idx]){
-                    int sx = i * length;
-                    int sy = j * length;
-                    squareSet(sx, sy, length, idx);
-                    used[idx] = true;
-                    ok[mask] = true;
-                    sq2Com[mask] = idx;
-                    break;
-                }
-            }
-        }
-        /*
-        vector<int> lengthenDir(cnt * cnt, -1);
-        rep(mask, cnt*cnt){
-            int i = mask/cnt;
-            int j = mask%cnt;
-            if(not ok[mask]){
-                rep(k,4){
-                    int ni = i + dx[k];
-                    int nj = j + dy[k];
-                    int nmask = ni * cnt + nj;
-                    if(0 <= ni && ni < cnt && 0 <= nj && nj < cnt){
-                        if(ok[nmask]){
-                            if(lengthenDir[nmask] == -1 || lengthenDir[nmask] == k%2){
-                                // 元々一緒だった会社はどこか
-                                int comIdx = sq2Com[nmask];
-                                // const int dx[8] = {1, 0, -1, 0, 1, -1, -1, 1};
-                                // const int dy[8] = {0, 1, 0, -1, 1, 1, -1, -1};
-                                // 下とマージ
-                                if(k == 0){
-                                    recSet(a[comIdx]-length, b[comIdx], c[comIdx]-a[comIdx]+length, d[comIdx]-b[comIdx], comIdx);
-                                    lengthenDir[nmask] = lengthenDir[mask] = k%2;
-                                }
-                                // 右とマージ
-                                if(k == 1){
-                                    recSet(a[comIdx], b[comIdx]-length, c[comIdx]-a[comIdx], d[comIdx]-b[comIdx]+length, comIdx);
-                                    lengthenDir[nmask] = lengthenDir[mask] = k%2;
-                                }
-                                // 上とマージ
-                                if(k == 2){
-                                    recSet(a[comIdx], b[comIdx], c[comIdx]-a[comIdx]+length, d[comIdx]-b[comIdx], comIdx);
-                                    lengthenDir[nmask] = lengthenDir[mask] = k%2;
-                                }
-                                // 左とマージ
-                                if(k == 3){
-                                    recSet(a[comIdx], b[comIdx], c[comIdx]-a[comIdx], d[comIdx]-b[comIdx]+length, comIdx);
-                                    lengthenDir[nmask] = lengthenDir[mask] = k%2;
-                                }
-                                sq2Com[mask] = comIdx;
-                                ok[mask] = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        */
-    }
     bool checkIn(const Rect &a){
         return a.x1 <= x[a.idx] && x[a.idx] < a.x2 && 
         a.y1 <= y[a.idx] && y[a.idx] < a.y2;
@@ -465,7 +377,6 @@ int main() {
     aMyTimer.reset();
     Solver aSolver;
     aSolver.pointSets(); // 一番簡単
-    // aSolver.averageSets(); // 大きさ考慮してないのでダメダメ。21.8 million点
     aSolver.HogeSets();
     int itr = 0;
     while(aMyTimer.get() < 5){
