@@ -113,11 +113,22 @@ const int MAXN = 222;
 int N;
 int x[MAXN], y[MAXN];
 ll r[MAXN];
+ll dist[MAXN][MAXN];
+vector<int> distIdx[MAXN];
 class Solver{
 public:
     Rect out[MAXN];
     Solver(){
         input();
+        rep(i,N){
+            rep(j,N){
+                dist[i][j] = abs(x[i]-x[j]) + abs(y[i]-y[j]);
+                distIdx[i].push_back(j);
+            }
+            sort(all(distIdx[i]), [&](int a, int b){
+                return dist[i][a] < dist[i][b];
+            });
+        }
     }
     void input(){
         cin >> N;
@@ -146,6 +157,7 @@ public:
         return a.x1 <= x[a.idx] && x[a.idx] < a.x2 && 
         a.y1 <= y[a.idx] && y[a.idx] < a.y2;
     }
+
     void RandomMove(){
         int cnt = 20;
         int itr = 0;
@@ -171,8 +183,8 @@ public:
             }
             bool ok = true;
             rep(j,N){
-                if(j == idx)continue;
-                if(intersect(tmp, out[j])){
+                if(j == 0)continue;
+                if(intersect(tmp, out[distIdx[idx][j]])){
                     ok = false;
                     break;
                 }
@@ -186,7 +198,7 @@ public:
             }
         }
     }
-    void HogeSets(bool shuffle = false){
+    void HogeSets(bool shuffle = false, int dir = 0){
         // pointSets();
         vector<int> idxes;
         rep(i,N)idxes.push_back(i);
@@ -197,7 +209,7 @@ public:
         else{
             sort(all(idxes), [&](int i, int j){
                 // return r[i] < r[j];
-                return make_pair(x[i], y[i]) < make_pair(x[j], y[j]);
+                return make_pair(x[i]*dx[dir+4], y[i]*dy[dir+4]) < make_pair(x[j]*dx[dir+4], y[j]*dy[dir+4]);
             });
         }
         for(auto &idx: idxes){
@@ -303,8 +315,8 @@ public:
                 return false;
             }
             rep(j,N){
-                if(j == idx)continue;
-                if(intersect(tmp, out[j]))return false;
+                if(j == 0)continue;
+                if(intersect(tmp, out[distIdx[idx][j]]))return false;
             }
             return true;
         };
@@ -312,7 +324,7 @@ public:
             return;
         }
         int ok = 0;
-        int ng = W;
+        int ng = W/2;
         while(ng - ok > 1){
             int mid = (ok + ng) / 2;
             if(check(mid))ok = mid;
@@ -386,7 +398,17 @@ int main() {
     aMyTimer.reset();
     Solver aSolver;
     aSolver.pointSets(); // 一番簡単
-    aSolver.HogeSets();
+    aSolver.HogeSets(false, 0);
+    long long maxx = aSolver.calcScoreAll();
+    rep(dir,4){
+        auto tSolver = aSolver;
+        tSolver.pointSets();
+        tSolver.HogeSets(false, dir);
+        if(chmax(maxx, tSolver.calcScoreAll())){
+            dump(dir, maxx);
+            swap(tSolver, aSolver);
+        }
+    }
     int itr = 0;
     long double startTime = aMyTimer.get();
     long double nowTime = startTime;
@@ -394,15 +416,14 @@ int main() {
     long double endTemp = 100;
 
     long long startScore = aSolver.calcScoreAll();
-    // bool f = startScore <= 800000000;
-    bool f = false;
+    bool f = startScore <= 800000000;
+    // bool f = false;
     while(nowTime < 5.3){
         auto tSolver = aSolver;
         aSolver.RandomMove();
         aSolver.HogeSets(true);
         ll preScore = tSolver.calcScoreAll();
         ll newScore = aSolver.calcScoreAll();
-
         nowTime = aMyTimer.get();
         long double tmp = startTemp + (endTemp - startTemp) * (nowTime - startTime);
         long double prob = exp((newScore-preScore)/tmp);
