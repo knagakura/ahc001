@@ -197,14 +197,28 @@ public:
         }
         else{
             sort(all(idxes), [&](int i, int j){
-                return r[i] < r[j];
-                // return make_pair(x[i], y[i]) < make_pair(x[j], y[j]);
+                // return r[i] < r[j];
+                return make_pair(x[i], y[i]) < make_pair(x[j], y[j]);
             });
         }
         for(auto &idx: idxes){
             if(out[idx].ratio() > 20 && XorShift() % 100 < 20){
                 pointSet(idx);
             }
+        }
+        if(not shuffle){
+            for(auto &idx: idxes){
+                setGreedyXY(idx);
+            }
+        }
+        for(auto &idx: idxes){
+            setGreedy(idx, XorShift()%2, XorShift()%2, XorShift()%2, XorShift()%2);
+        }
+        for(auto &idx: idxes){
+            setGreedy(idx, XorShift()%2, XorShift()%2, XorShift()%2, XorShift()%2);
+        }
+        for(auto &idx: idxes){
+            setGreedy(idx, XorShift()%2, XorShift()%2, XorShift()%2, XorShift()%2);
         }
         for(auto &idx: idxes){
             setGreedyXY(idx);
@@ -390,6 +404,5 @@ int main() {
         // }
         itr++;
     }
-    aSolver.HogeSets();
     aSolver.outPut();
 }
