@@ -11,7 +11,7 @@ typedef pair<int, int> i_i;
 typedef pair<ll, ll> l_l;
 template <class T> using vec = vector<T>;
 template <class T> using vvec = vector<vec<T>>;
-struct fast_ios{ fast_ios(){ cin.tie(0); ios::sync_with_stdio(false); cout << fixed << setprecision(20); }; }fast_ios_;
+struct fast_ios{ fast_ios(){ cin.tie(0); ios::sync_with_stdio(false); cout << fixed << setprecision(20); cerr << fixed << setprecision(20);}; }fast_ios_;
 
 template<class T> inline bool chmax(T& a, T b) { if (a < b) { a = b; return true; } return false; }
 template<class T> inline bool chmin(T& a, T b) { if (a > b) { a = b; return true; } return false; }
@@ -141,8 +141,11 @@ public:
                y1 <= y[idx] && y[idx] < y2;
     }
     long double calcScore(int idx){
-        long long s = out[idx].size();
-        long double tmp = (long double)(min(r[idx], s)) / (long double)(max(r[idx], s));
+        return calcScore(out[idx]);
+    }
+    long double calcScore(Rect&a){
+        long long s = a.size();
+        long double tmp = (long double)(min(r[a.idx], s)) / (long double)(max(r[a.idx], s));
         long double res = (long double)1.0f - (long double)((long double)1.0f - tmp) * (long double)((long double)1.0f - tmp);
         return res;
     }
@@ -196,6 +199,67 @@ public:
                 itr++;
                 // break;
             }
+        }
+    }
+    void SmallChange(){
+        rep(i,N){
+            // auto v = divisor(r[i]);
+            // dump(v);
+            auto pre = calcScore(i);
+            auto tmpOut = out[i];
+            int diff = XorShift()%3;
+            tmpOut.x1 += diff;
+            tmpOut.y1 -= diff;
+            if(not isValidMove(tmpOut))continue;
+            auto newScore = calcScore(tmpOut);
+            if(newScore > pre){
+                dump(newScore, pre);
+                dump(out[i].size(), tmpOut.size(), r[i]);
+                swap(out[i], tmpOut);
+            }
+        }
+    }
+    void MoveDir(int idx, int dir = 0){
+        auto check = [&](int mid) -> bool{
+            Rect tmp = out[idx];
+            tmp.x1 += mid * dx[dir];
+            tmp.x2 += mid * dx[dir];
+            tmp.y1 += mid * dy[dir];
+            tmp.y2 += mid * dy[dir];
+            if(not checkIn(tmp))return false;
+            if(not IsIn(tmp.x1, tmp.y1) || not IsIn(tmp.x2, tmp.y2)){
+                return false;
+            }
+            rep(j,N){
+                if(j == 0)continue;
+                if(intersect(tmp, out[distIdx[idx][j]]))return false;
+            }
+            return true;
+        };
+        if(!check(1)){
+            return;
+        }
+
+        int ok = 0;
+        int ng = W;
+        while(ng - ok > 1){
+            int mid = (ok + ng) / 2;
+            if(check(mid))ok = mid;
+            else ng = mid;
+        }
+        out[idx].x1 += ok * dx[dir];
+        out[idx].x2 += ok * dx[dir];
+        out[idx].y1 += ok * dy[dir];
+        out[idx].y2 += ok * dy[dir];
+    }
+    void GravityMove(int dir = 0){
+        vector<int> idxes;
+        rep(i,N)idxes.push_back(i);
+        sort(all(idxes), [&](int i, int j){
+            return make_pair(out[i].x1*dx[dir], out[i].y1*dy[dir]) < make_pair(out[j].x1*dx[dir], out[j].y1*dy[dir]);
+        });
+        rep(j,N){
+            MoveDir(idxes[j], dir);
         }
     }
     void HogeSets(bool shuffle = false, int dir = 0){
@@ -294,6 +358,7 @@ public:
         setGreedy(idx, false, false, false, true);
     }
     bool isValidMove(const Rect &a){
+        if(not checkIn(a))return false;
         if(not IsIn(a.x1, a.y1) || not IsIn(a.x2, a.y2)){
             return false;
         }
@@ -405,7 +470,6 @@ int main() {
         tSolver.pointSets();
         tSolver.HogeSets(false, dir);
         if(chmax(maxx, tSolver.calcScoreAll())){
-            dump(dir, maxx);
             swap(tSolver, aSolver);
         }
     }
@@ -439,8 +503,6 @@ int main() {
         }
         if(itr % 1000 == 0){
             dump(itr, aMyTimer.get(), aSolver.calcScoreAll());
-            dump(tmp);
-            dump(prob);
         }
         // if(aSolver.N < 70){
         //     aSolver.ratioSets();
