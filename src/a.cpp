@@ -110,13 +110,12 @@ bool intersect(const Rect &a, const Rect &b){
 }
 
 const int MAXN = 222;
+int N;
+int x[MAXN], y[MAXN];
+ll r[MAXN];
 class Solver{
 public:
-    int N;
-    int x[MAXN], y[MAXN];
-    ll r[MAXN];
     Rect out[MAXN];
-    ll scores[200];
     Solver(){
         input();
     }
