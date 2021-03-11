@@ -154,8 +154,8 @@ public:
             int idx = XorShift()%N;
             ll ddx = out[idx].x2 - out[idx].x1;
             ll ddy = out[idx].y2 - out[idx].y1;
-            int diffX = XorShift()%100+3;
-            int diffY = XorShift()%100+3;
+            int diffX = XorShift()%200+3;
+            int diffY = XorShift()%200+3;
             int dir = XorShift() % 8;
             auto tmp = out[idx];
             if(XorShift()%2)tmp.x1 += diffX * dx[dir];
@@ -389,15 +389,38 @@ int main() {
     aSolver.pointSets(); // 一番簡単
     aSolver.HogeSets();
     int itr = 0;
-    while(aMyTimer.get() < 5.3){
+    long double startTime = aMyTimer.get();
+    long double nowTime = startTime;
+    long double startTemp = 500;
+    long double endTemp = 100;
+
+    long long startScore = aSolver.calcScoreAll();
+    // bool f = startScore <= 800000000;
+    bool f = false;
+    while(nowTime < 5.3){
         auto tSolver = aSolver;
         aSolver.RandomMove();
         aSolver.HogeSets(true);
-        if(tSolver.calcScoreAll() > aSolver.calcScoreAll()){
-            swap(tSolver, aSolver);
+        ll preScore = tSolver.calcScoreAll();
+        ll newScore = aSolver.calcScoreAll();
+
+        nowTime = aMyTimer.get();
+        long double tmp = startTemp + (endTemp - startTemp) * (nowTime - startTime);
+        long double prob = exp((newScore-preScore)/tmp);
+        if(f){
+            if(prob > (XorShift()%INF)/(long double)INF){
+                swap(tSolver, aSolver);
+            }
+        }
+        else{
+            if(preScore > newScore){
+                swap(tSolver, aSolver);
+            }
         }
         if(itr % 1000 == 0){
             dump(itr, aMyTimer.get(), aSolver.calcScoreAll());
+            dump(tmp);
+            dump(prob);
         }
         // if(aSolver.N < 70){
         //     aSolver.ratioSets();
