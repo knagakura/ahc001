@@ -117,9 +117,11 @@ ll dist[MAXN][MAXN];
 vector<int> distIdx[MAXN];
 class Solver{
 public:
-    Rect out[MAXN];
+    vector<Rect> out;
+    // Rect out[MAXN];
     Solver(){
         input();
+        out.resize(N);
         rep(i,N){
             rep(j,N){
                 dist[i][j] = abs(x[i]-x[j]) + abs(y[i]-y[j]);
@@ -260,7 +262,7 @@ public:
             MoveDir(idxes[j], dir);
         }
     }
-    void HogeSets(bool shuffle = false, int dir = 0){
+    void HogeSets(bool shuffle = false, int dir = 0, bool comp = false){
         // pointSets();
         vector<int> idxes;
         rep(i,N)idxes.push_back(i);
@@ -270,8 +272,8 @@ public:
         }
         else{
             sort(all(idxes), [&](int i, int j){
-                // return r[i] < r[j];
-                return make_pair(x[i]*dx[dir+4], y[i]*dy[dir+4]) < make_pair(x[j]*dx[dir+4], y[j]*dy[dir+4]);
+                if(comp)return r[i] < r[j];
+                else return make_pair(x[i]*dx[dir+4], y[i]*dy[dir+4]) < make_pair(x[j]*dx[dir+4], y[j]*dy[dir+4]);
             });
         }
         for(auto &idx: idxes){
@@ -469,12 +471,15 @@ int main() {
     aSolver.pointSets(); // 一番簡単
     aSolver.HogeSets(false, 0);
     long long maxx = aSolver.calcScoreAll();
-    rep(dir,4){
-        auto tSolver = aSolver;
-        tSolver.pointSets();
-        tSolver.HogeSets(false, dir);
-        if(chmax(maxx, tSolver.calcScoreAll())){
-            swap(tSolver, aSolver);
+    rep(dir,4)rep(j,1){
+        auto preOut = aSolver.out;
+        aSolver.pointSets();
+        aSolver.HogeSets(false, dir, j);
+        if(not chmax(maxx, aSolver.calcScoreAll())){
+            swap(aSolver.out, preOut);
+        }
+        else{
+            dump(dir, j, maxx);
         }
     }
     int itr = 0;
@@ -486,24 +491,32 @@ int main() {
     long long startScore = aSolver.calcScoreAll();
     bool f = startScore <= 800000000;
     // bool f = false;
+    int changed = 0;
+    vector<int> diffs;
     while(nowTime < 5.3){
-        auto tSolver = aSolver;
+        auto preOuts = aSolver.out;
+        auto preScore = aSolver.calcScoreAll();
         aSolver.RandomMove();
         aSolver.HogeSets(true);
-        ll preScore = tSolver.calcScoreAll();
         ll newScore = aSolver.calcScoreAll();
         nowTime = aMyTimer.get();
         long double tmp = startTemp + (endTemp - startTemp) * (nowTime - startTime);
         long double prob = exp((newScore-preScore)/tmp);
         if(f){
             if(prob > (XorShift()%INF)/(long double)INF){
-                swap(tSolver, aSolver);
+                swap(preOuts, aSolver.out);
             }
         }
         else{
-            if(preScore > newScore){
-                swap(tSolver, aSolver);
+            if(preScore > /*(preScore < 960000000 ? 10 : 0)*/ + newScore){
+                swap(preOuts, aSolver.out);
             }
+#ifdef DEBUG
+            else{
+                changed++;
+                diffs.push_back(newScore-preScore);
+            }
+#endif
         }
         if(itr % 1000 == 0){
             dump(itr, aMyTimer.get(), aSolver.calcScoreAll());
@@ -517,5 +530,11 @@ int main() {
     aSolver.outPutOneLine();
 #else
     aSolver.outPut();
+#ifdef DEBUG
+    aSolver.debug();
+    dump(changed, itr);;
+    dump(diffs);
+#endif
+    dump(*max_element(all(diffs)));
 #endif
 }
