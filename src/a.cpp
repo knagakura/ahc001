@@ -412,6 +412,12 @@ public:
             cout << out[idx] << endl;
         }
     }
+    void outPutOneLine(){
+        rep(idx,N){
+            cout << out[idx] << " ";
+        }
+        cout << endl;
+    }
     // 角(x, y),　縦rx, 横ryの長方形
     void recSet(int x, int y, int rx, int ry, int idx){
         outSet(x, y, x+rx, y+ry, idx);
@@ -501,8 +507,15 @@ int main() {
         }
         if(itr % 1000 == 0){
             dump(itr, aMyTimer.get(), aSolver.calcScoreAll());
+#ifdef FIG
+            aSolver.outPutOneLine();
+#endif
         }
         itr++;
     }
+#ifdef FIG
+    aSolver.outPutOneLine();
+#else
     aSolver.outPut();
+#endif
 }
