@@ -166,8 +166,6 @@ public:
         int itr = 0;
         while(itr < cnt){
             int idx = XorShift()%N;
-            ll ddx = out[idx].x2 - out[idx].x1;
-            ll ddy = out[idx].y2 - out[idx].y1;
             int diffX = XorShift()%200+3;
             int diffY = XorShift()%200+3;
             int dir = XorShift() % 8;
