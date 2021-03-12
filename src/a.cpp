@@ -502,9 +502,6 @@ int main() {
         if(itr % 1000 == 0){
             dump(itr, aMyTimer.get(), aSolver.calcScoreAll());
         }
-        // if(aSolver.N < 70){
-        //     aSolver.ratioSets();
-        // }
         itr++;
     }
     aSolver.outPut();
