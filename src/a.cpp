@@ -104,6 +104,13 @@ struct Rect{
     bool operator<(const Rect& b){
         return x1 < b.x1;
     }
+    bool IsIn(const Rect &a){
+        return 
+        x1 <= a.x1 && a.x1 < x2 && 
+        x1 <= a.x2 && a.x2 < x2 && 
+        y1 <= a.y1 && a.y1 < y2 && 
+        y1 <= a.y2 && a.y2 < y2;
+    }
 };
 bool intersect(const Rect &a, const Rect &b){
     return min(a.x2, b.x2) > max(a.x1, b.x1) && min(a.y2, b.y2) > max(a.y1, b.y1);
@@ -115,6 +122,14 @@ int x[MAXN], y[MAXN];
 ll r[MAXN];
 ll dist[MAXN][MAXN];
 vector<int> distIdx[MAXN];
+Rect DivRects[5] = {
+    {0, 0, W/2+W/4, W/2+W/4}, 
+    {0, W/2-W/4, W/2+W/4, W},
+    {W/2-W/4, 0, W, W/2+W/4}, 
+    {W/2-W/4, W/2-W/4, W, W},
+    {0, 0, W, W}
+    };
+vector<int> DivIdx[5];
 class Solver{
 public:
     vector<Rect> out;
@@ -130,6 +145,14 @@ public:
             sort(all(distIdx[i]), [&](int a, int b){
                 return dist[i][a] < dist[i][b];
             });
+        }
+        pointSets();
+        rep(i,N){
+            rep(j,5){
+                if(DivRects[j].IsIn(out[i])){
+                    DivIdx[j].push_back(i);
+                }
+            }
         }
     }
     void input(){
@@ -151,25 +174,30 @@ public:
         long double res = (long double)1.0f - (long double)((long double)1.0f - tmp) * (long double)((long double)1.0f - tmp);
         return res;
     }
-    long long calcScoreAll(){
+    long long calcScoreAll(int div = 4){
         long double score = 0.0;
-        rep(i,N){
-            score += calcScore(i);
+        int sz = DivIdx[div].size();
+        rep(i,sz){
+            score += calcScore(DivIdx[div][i]);
         }
-        return (long long)(round((long double)1e9 * score) / (long double)(N));
+        return (long long)(round((long double)1e9 * score) / (long double)(sz));
     }
     bool checkIn(const Rect &a){
         return a.x1 <= x[a.idx] && x[a.idx] < a.x2 && 
         a.y1 <= y[a.idx] && y[a.idx] < a.y2;
     }
 
-    void RandomMove(){
+    void RandomMove(int div = 4){
         int cnt = 20;
         int itr = 0;
+        int sz = DivIdx[div].size();
+        int maxx = 200;
+        // if(div != 4)maxx /= 2;
         while(itr < cnt){
-            int idx = XorShift()%N;
-            int diffX = XorShift()%200+3;
-            int diffY = XorShift()%200+3;
+            int idx = DivIdx[div][XorShift()%sz];
+            // int idx = XorShift()%N;
+            int diffX = XorShift()%maxx+3;
+            int diffY = XorShift()%maxx+3;
             int dir = XorShift() % 8;
             auto tmp = out[idx];
             if(XorShift()%2)tmp.x1 += diffX * dx[dir];
@@ -468,7 +496,6 @@ public:
 int main() {
     aMyTimer.reset();
     Solver aSolver;
-    aSolver.pointSets(); // 一番簡単
     aSolver.HogeSets(false, 0);
     long long maxx = aSolver.calcScoreAll();
     rep(dir,4)rep(j,1){
@@ -493,38 +520,51 @@ int main() {
     // bool f = false;
     int changed = 0;
     vector<int> diffs;
-    while(nowTime < 5.3){
+    ll allScore = aSolver.calcScoreAll(4);
+    while(nowTime < 5.33){
+        itr++;
+        nowTime = aMyTimer.get();
         auto preOuts = aSolver.out;
         auto preScore = aSolver.calcScoreAll();
-        aSolver.RandomMove();
+        int div = XorShift()%5;
+        // int div = 4;
+        if(N<150)div = 4;
+        ll divScore = (div == 4 ? 1e15: aSolver.calcScoreAll(div));
+        if(div != 4 && allScore - divScore <= 100000000){
+            continue;
+        }
+        aSolver.RandomMove(div);;
         aSolver.HogeSets(true);
-        ll newScore = aSolver.calcScoreAll();
-        nowTime = aMyTimer.get();
+        ll newScore = aSolver.calcScoreAll(4);
         long double tmp = startTemp + (endTemp - startTemp) * (nowTime - startTime);
         long double prob = exp((newScore-preScore)/tmp);
         if(f){
             if(prob > (XorShift()%INF)/(long double)INF){
                 swap(preOuts, aSolver.out);
             }
+            else{
+                allScore = newScore;
+            }
         }
         else{
-            if(preScore > /*(preScore < 960000000 ? 10 : 0)*/ + newScore){
+            if(preScore > newScore){
                 swap(preOuts, aSolver.out);
             }
-#ifdef DEBUG
             else{
+                allScore = newScore;
+#ifdef DEBUG
                 changed++;
                 diffs.push_back(newScore-preScore);
-            }
 #endif
+            }
         }
         if(itr % 1000 == 0){
             dump(itr, aMyTimer.get(), aSolver.calcScoreAll());
+            dump(div, divScore);
 #ifdef FIG
-            aSolver.outPutOneLine();
+            // aSolver.outPutOneLine();
 #endif
         }
-        itr++;
     }
 #ifdef FIG
     aSolver.outPutOneLine();
