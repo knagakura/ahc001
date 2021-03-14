@@ -163,6 +163,8 @@ public:
         int itr = 0;
         while(itr < cnt){
             int idx = XorShift()%N;
+            ll ddx = out[idx].x2 - out[idx].x1;
+            ll ddy = out[idx].y2 - out[idx].y1;
             int diffX = XorShift()%200+3;
             int diffY = XorShift()%200+3;
             int dir = XorShift() % 8;
@@ -172,11 +174,6 @@ public:
             if(XorShift()%2)tmp.y1 += diffY * dy[dir];
             if(XorShift()%2)tmp.y2 += diffY * dy[dir];
             if(tmp.size() > out[idx].size())continue;
-            if(tmp.size() == out[idx].size()){
-                itr++;
-                if(XorShift()%100 < 20)pointSet(idx);
-                continue;
-            }
             // if(not isValidMove(tmp))continue;
             if(not IsIn(tmp.x1, tmp.y1) || not IsIn(tmp.x2, tmp.y2)){
                 continue;
@@ -185,13 +182,21 @@ public:
                 continue;
             }
             bool ok = true;
-            rep(j,N){
-                if(j == 0)continue;
-                if(intersect(tmp, out[distIdx[idx][j]])){
-                    ok = false;
-                    break;
+            if(not(
+                    tmp.x1 == out[idx].x1 &&
+                    tmp.x2 == out[idx].x2 &&
+                    tmp.y1 == out[idx].y1 &&
+                    tmp.y2 == out[idx].y2
+            )){
+                rep(j,N){
+                    if(j == 0)continue;
+                    if(intersect(tmp, out[distIdx[idx][j]])){
+                        ok = false;
+                        break;
+                    }
                 }
             }
+            if(not ok)continue;
             if(ok){
                 swap(out[idx], tmp);
                 if(XorShift()%100 < 20)pointSet(idx);
@@ -427,7 +432,7 @@ int main() {
     long long startScore = aSolver.calcScoreAll();
     bool f = startScore <= 800000000;
     // bool f = false;
-    while(nowTime < 5.3){
+    while(nowTime < 5.33){
         auto tSolver = aSolver;
         aSolver.RandomMove();
         aSolver.HogeSets(true);
