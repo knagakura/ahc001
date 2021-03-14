@@ -115,6 +115,7 @@ int x[MAXN], y[MAXN];
 ll r[MAXN];
 ll dist[MAXN][MAXN];
 vector<int> distIdx[MAXN];
+int calcedCnt[MAXN][16];
 class Solver{
 public:
     Rect out[MAXN];
@@ -162,8 +163,6 @@ public:
         int itr = 0;
         while(itr < cnt){
             int idx = XorShift()%N;
-            ll ddx = out[idx].x2 - out[idx].x1;
-            ll ddy = out[idx].y2 - out[idx].y1;
             int diffX = XorShift()%200+3;
             int diffY = XorShift()%200+3;
             int dir = XorShift() % 8;
@@ -173,6 +172,11 @@ public:
             if(XorShift()%2)tmp.y1 += diffY * dy[dir];
             if(XorShift()%2)tmp.y2 += diffY * dy[dir];
             if(tmp.size() > out[idx].size())continue;
+            if(tmp.size() == out[idx].size()){
+                itr++;
+                if(XorShift()%100 < 20)pointSet(idx);
+                continue;
+            }
             // if(not isValidMove(tmp))continue;
             if(not IsIn(tmp.x1, tmp.y1) || not IsIn(tmp.x2, tmp.y2)){
                 continue;
@@ -188,7 +192,6 @@ public:
                     break;
                 }
             }
-            if(not ok)continue;
             if(ok){
                 swap(out[idx], tmp);
                 if(XorShift()%100 < 20)pointSet(idx);
@@ -215,6 +218,9 @@ public:
             if(out[idx].ratio() > 20 && XorShift() % 100 < 20){
                 pointSet(idx);
             }
+        }
+        rep(i,N)rep(j,16){
+            calcedCnt[i][j] = 0;
         }
         if(not shuffle){
             for(auto &idx: idxes){
@@ -303,7 +309,9 @@ public:
         return true;
     }
     void setGreedy(int idx, bool x1, bool x2, bool y1, bool y2){
+        int j = bit(3)*x1+bit(2)*x2+bit(1)*y1+bit(0)*y2;
         if(not(x1 || x2 || y1 || y2))return;
+        if(calcedCnt[idx][j])return;
         auto check = [&](int mid) -> bool{
             Rect tmp = out[idx];
             if(x1)tmp.x1 -= mid;
@@ -334,6 +342,7 @@ public:
         if(x2)out[idx].x2 += ok;
         if(y1)out[idx].y1 -= ok;
         if(y2)out[idx].y2 += ok;
+        calcedCnt[idx][j]++;
     }
     void swapXYofOut(){
         rep(i,N){
