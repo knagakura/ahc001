@@ -437,7 +437,6 @@ int main() {
     long long startScore = aSolver.calcScoreAll();
     bool f = startScore <= 800000000;
     // bool f = false;
-    int itr = 0;
     while(nowTime < 5.33){
         auto tSolver = aSolver;
         itr++;
