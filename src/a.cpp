@@ -90,7 +90,7 @@ struct Box{
     Box(){}
     Box(ll x1_, ll y1_, ll x2_, ll y2_, int idx_):x1(x1_), y1(y1_), x2(x2_), y2(y2_), idx(idx_), lowerBound(x1, y2), upperBound(x2, y2){
     }
-    ll size(){
+    ll area(){
         return lenx() * leny();
     }
     ll ratio(){
@@ -147,7 +147,7 @@ public:
                y1 <= y[idx] && y[idx] < y2;
     }
     long double calcScore(int idx){
-        long long s = out[idx].size();
+        long long s = out[idx].area();
         long double tmp = (long double)(min(r[idx], s)) / (long double)(max(r[idx], s));
         long double res = (long double)1.0f - (long double)((long double)1.0f - tmp) * (long double)((long double)1.0f - tmp);
         return res;
@@ -178,7 +178,7 @@ public:
             if(XorShift()%2)tmp.x2 += diffX * dx[dir];
             if(XorShift()%2)tmp.y1 += diffY * dy[dir];
             if(XorShift()%2)tmp.y2 += diffY * dy[dir];
-            if(tmp.size() > out[idx].size())continue;
+            if(tmp.area() > out[idx].area())continue;
             // if(not isValidMove(tmp))continue;
             if(not IsIn(tmp.x1, tmp.y1) || not IsIn(tmp.x2, tmp.y2)){
                 continue;
@@ -328,7 +328,7 @@ public:
             if(x2)tmp.x2 += mid;
             if(y1)tmp.y1 -= mid;
             if(y2)tmp.y2 += mid;
-            if(tmp.size() > r[idx])return false;
+            if(tmp.area() > r[idx])return false;
             if(not IsIn(tmp.x1, tmp.y1) || not IsIn(tmp.x2, tmp.y2)){
                 return false;
             }
@@ -389,7 +389,7 @@ public:
     }
     void debug(){
         for(Box &a: out){
-            dump(a.idx, a.x2 - a.x1, a.y2 - a.y1, a.size(), r[a.idx], a.ratio());
+            dump(a.idx, a.x2 - a.x1, a.y2 - a.y1, a.area(), r[a.idx], a.ratio());
         }
     }
     void pointReset(int idx){
