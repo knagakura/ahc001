@@ -114,6 +114,14 @@ bool intersect(const Box &a, const Box &b){
     return min(a.x2, b.x2) > max(a.x1, b.x1) && min(a.y2, b.y2) > max(a.y1, b.y1);
 }
 
+Box Union(const Box &a, const Box &b){
+    auto [x1, y1] = min(a.lowerBound, b.lowerBound);
+    auto [x2, y2] = min(a.upperBound, b.upperBound);
+    Box res(x1, y1, x2, y2, a.idx);
+    return res;
+}
+// Dynamic Bounding Volume Hirrarchies
+
 const int MAXN = 222;
 int N;
 int x[MAXN], y[MAXN];
