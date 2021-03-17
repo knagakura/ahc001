@@ -79,7 +79,7 @@ bool IsIn(int i,int j){
     return 0 <= i && i < H && 0 <= j && j < W;
 };
 // 長方形
-struct Rect{
+struct Box{
     ll x1;
     ll y1;
     ll x2;
@@ -97,15 +97,15 @@ struct Rect{
     ll leny(){
         return (y2 - y1);
     }
-    friend std::ostream& operator<<(std::ostream& os, const Rect& a){
+    friend std::ostream& operator<<(std::ostream& os, const Box& a){
         os << a.x1 << " " << a.y1 << " " << a.x2 << " " << a.y2;
         return os;
     }
-    bool operator<(const Rect& b){
+    bool operator<(const Box& b){
         return x1 < b.x1;
     }
 };
-bool intersect(const Rect &a, const Rect &b){
+bool intersect(const Box &a, const Box &b){
     return min(a.x2, b.x2) > max(a.x1, b.x1) && min(a.y2, b.y2) > max(a.y1, b.y1);
 }
 
@@ -118,7 +118,7 @@ vector<int> distIdx[MAXN];
 int calcedCnt[MAXN][16];
 class Solver{
 public:
-    Rect out[MAXN];
+    Box out[MAXN];
     Solver(){
         input();
         rep(i,N){
@@ -154,7 +154,7 @@ public:
         }
         return (long long)(round((long double)1e9 * score) / (long double)(N));
     }
-    bool checkIn(const Rect &a){
+    bool checkIn(const Box &a){
         return a.x1 <= x[a.idx] && x[a.idx] < a.x2 && 
         a.y1 <= y[a.idx] && y[a.idx] < a.y2;
     }
@@ -303,7 +303,7 @@ public:
     void setGreedyY2(int idx){
         setGreedy(idx, false, false, false, true);
     }
-    bool isValidMove(const Rect &a){
+    bool isValidMove(const Box &a){
         if(not IsIn(a.x1, a.y1) || not IsIn(a.x2, a.y2)){
             return false;
         }
@@ -318,7 +318,7 @@ public:
         if(not(x1 || x2 || y1 || y2))return;
         if(calcedCnt[idx][j])return;
         auto check = [&](int mid) -> bool{
-            Rect tmp = out[idx];
+            Box tmp = out[idx];
             if(x1)tmp.x1 -= mid;
             if(x2)tmp.x2 += mid;
             if(y1)tmp.y1 -= mid;
@@ -351,12 +351,12 @@ public:
     }
     void swapXYofOut(){
         rep(i,N){
-            out[i] = Rect{out[i].y1, out[i].x1, out[i].y2, out[i].x2, out[i].idx};
+            out[i] = Box{out[i].y1, out[i].x1, out[i].y2, out[i].x2, out[i].idx};
         }
     }
     // 長方形[x1, x2), [y1, y2)
     void outSet(int x1, int y1, int x2, int y2, int idx){
-        out[idx] = Rect({x1, y1, x2, y2, idx});
+        out[idx] = Box({x1, y1, x2, y2, idx});
     }
     void outPut(){
         rep(idx,N){
@@ -383,7 +383,7 @@ public:
         }
     }
     void debug(){
-        for(Rect &a: out){
+        for(Box &a: out){
             dump(a.idx, a.x2 - a.x1, a.y2 - a.y1, a.size(), r[a.idx], a.ratio());
         }
     }
