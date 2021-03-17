@@ -104,13 +104,6 @@ struct Rect{
     bool operator<(const Rect& b){
         return x1 < b.x1;
     }
-    bool IsIn(const Rect &a){
-        return 
-        x1 <= a.x1 && a.x1 < x2 && 
-        x1 <= a.x2 && a.x2 < x2 && 
-        y1 <= a.y1 && a.y1 < y2 && 
-        y1 <= a.y2 && a.y2 < y2;
-    }
 };
 bool intersect(const Rect &a, const Rect &b){
     return min(a.x2, b.x2) > max(a.x1, b.x1) && min(a.y2, b.y2) > max(a.y1, b.y1);
@@ -122,21 +115,12 @@ int x[MAXN], y[MAXN];
 ll r[MAXN];
 ll dist[MAXN][MAXN];
 vector<int> distIdx[MAXN];
-Rect DivRects[5] = {
-    {0, 0, W/2+W/4, W/2+W/4}, 
-    {0, W/2-W/4, W/2+W/4, W},
-    {W/2-W/4, 0, W, W/2+W/4}, 
-    {W/2-W/4, W/2-W/4, W, W},
-    {0, 0, W, W}
-    };
-vector<int> DivIdx[5];
+int calcedCnt[MAXN][16];
 class Solver{
 public:
-    vector<Rect> out;
-    // Rect out[MAXN];
+    Rect out[MAXN];
     Solver(){
         input();
-        out.resize(N);
         rep(i,N){
             rep(j,N){
                 dist[i][j] = abs(x[i]-x[j]) + abs(y[i]-y[j]);
@@ -145,14 +129,6 @@ public:
             sort(all(distIdx[i]), [&](int a, int b){
                 return dist[i][a] < dist[i][b];
             });
-        }
-        pointSets();
-        rep(i,N){
-            rep(j,5){
-                if(DivRects[j].IsIn(out[i])){
-                    DivIdx[j].push_back(i);
-                }
-            }
         }
     }
     void input(){
@@ -166,38 +142,31 @@ public:
                y1 <= y[idx] && y[idx] < y2;
     }
     long double calcScore(int idx){
-        return calcScore(out[idx]);
-    }
-    long double calcScore(Rect&a){
-        long long s = a.size();
-        long double tmp = (long double)(min(r[a.idx], s)) / (long double)(max(r[a.idx], s));
+        long long s = out[idx].size();
+        long double tmp = (long double)(min(r[idx], s)) / (long double)(max(r[idx], s));
         long double res = (long double)1.0f - (long double)((long double)1.0f - tmp) * (long double)((long double)1.0f - tmp);
         return res;
     }
-    long long calcScoreAll(int div = 4){
+    long long calcScoreAll(){
         long double score = 0.0;
-        int sz = DivIdx[div].size();
-        rep(i,sz){
-            score += calcScore(DivIdx[div][i]);
+        rep(i,N){
+            score += calcScore(i);
         }
-        return (long long)(round((long double)1e9 * score) / (long double)(sz));
+        return (long long)(round((long double)1e9 * score) / (long double)(N));
     }
     bool checkIn(const Rect &a){
         return a.x1 <= x[a.idx] && x[a.idx] < a.x2 && 
         a.y1 <= y[a.idx] && y[a.idx] < a.y2;
     }
-
-    void RandomMove(int div = 4){
+    void RandomMove(){
         int cnt = 20;
         int itr = 0;
-        int sz = DivIdx[div].size();
-        int maxx = 200;
-        // if(div != 4)maxx /= 2;
         while(itr < cnt){
-            int idx = DivIdx[div][XorShift()%sz];
-            // int idx = XorShift()%N;
-            int diffX = XorShift()%maxx+3;
-            int diffY = XorShift()%maxx+3;
+            int idx = XorShift()%N;
+            ll ddx = out[idx].x2 - out[idx].x1;
+            ll ddy = out[idx].y2 - out[idx].y1;
+            int diffX = XorShift()%200+3;
+            int diffY = XorShift()%200+3;
             int dir = XorShift() % 8;
             auto tmp = out[idx];
             if(XorShift()%2)tmp.x1 += diffX * dx[dir];
@@ -213,11 +182,18 @@ public:
                 continue;
             }
             bool ok = true;
-            rep(j,N){
-                if(j == 0)continue;
-                if(intersect(tmp, out[distIdx[idx][j]])){
-                    ok = false;
-                    break;
+            if(not(
+                    tmp.x1 == out[idx].x1 &&
+                    tmp.x2 == out[idx].x2 &&
+                    tmp.y1 == out[idx].y1 &&
+                    tmp.y2 == out[idx].y2
+            )){
+                rep(j,N){
+                    if(j == 0)continue;
+                    if(intersect(tmp, out[distIdx[idx][j]])){
+                        ok = false;
+                        break;
+                    }
                 }
             }
             if(not ok)continue;
@@ -229,68 +205,7 @@ public:
             }
         }
     }
-    void SmallChange(){
-        rep(i,N){
-            // auto v = divisor(r[i]);
-            // dump(v);
-            auto pre = calcScore(i);
-            auto tmpOut = out[i];
-            int diff = XorShift()%3;
-            tmpOut.x1 += diff;
-            tmpOut.y1 -= diff;
-            if(not isValidMove(tmpOut))continue;
-            auto newScore = calcScore(tmpOut);
-            if(newScore > pre){
-                dump(newScore, pre);
-                dump(out[i].size(), tmpOut.size(), r[i]);
-                swap(out[i], tmpOut);
-            }
-        }
-    }
-    void MoveDir(int idx, int dir = 0){
-        auto check = [&](int mid) -> bool{
-            Rect tmp = out[idx];
-            tmp.x1 += mid * dx[dir];
-            tmp.x2 += mid * dx[dir];
-            tmp.y1 += mid * dy[dir];
-            tmp.y2 += mid * dy[dir];
-            if(not checkIn(tmp))return false;
-            if(not IsIn(tmp.x1, tmp.y1) || not IsIn(tmp.x2, tmp.y2)){
-                return false;
-            }
-            rep(j,N){
-                if(j == 0)continue;
-                if(intersect(tmp, out[distIdx[idx][j]]))return false;
-            }
-            return true;
-        };
-        if(!check(1)){
-            return;
-        }
-
-        int ok = 0;
-        int ng = W;
-        while(ng - ok > 1){
-            int mid = (ok + ng) / 2;
-            if(check(mid))ok = mid;
-            else ng = mid;
-        }
-        out[idx].x1 += ok * dx[dir];
-        out[idx].x2 += ok * dx[dir];
-        out[idx].y1 += ok * dy[dir];
-        out[idx].y2 += ok * dy[dir];
-    }
-    void GravityMove(int dir = 0){
-        vector<int> idxes;
-        rep(i,N)idxes.push_back(i);
-        sort(all(idxes), [&](int i, int j){
-            return make_pair(out[i].x1*dx[dir], out[i].y1*dy[dir]) < make_pair(out[j].x1*dx[dir], out[j].y1*dy[dir]);
-        });
-        rep(j,N){
-            MoveDir(idxes[j], dir);
-        }
-    }
-    void HogeSets(bool shuffle = false, int dir = 0, bool comp = false){
+    void HogeSets(bool shuffle = false, int dir = 0){
         // pointSets();
         vector<int> idxes;
         rep(i,N)idxes.push_back(i);
@@ -300,14 +215,17 @@ public:
         }
         else{
             sort(all(idxes), [&](int i, int j){
-                if(comp)return r[i] < r[j];
-                else return make_pair(x[i]*dx[dir+4], y[i]*dy[dir+4]) < make_pair(x[j]*dx[dir+4], y[j]*dy[dir+4]);
+                // return r[i] < r[j];
+                return make_pair(x[i]*dx[dir+4], y[i]*dy[dir+4]) < make_pair(x[j]*dx[dir+4], y[j]*dy[dir+4]);
             });
         }
         for(auto &idx: idxes){
             if(out[idx].ratio() > 20 && XorShift() % 100 < 20){
                 pointSet(idx);
             }
+        }
+        rep(i,N)rep(j,16){
+            calcedCnt[i][j] = 0;
         }
         if(not shuffle){
             for(auto &idx: idxes){
@@ -386,7 +304,6 @@ public:
         setGreedy(idx, false, false, false, true);
     }
     bool isValidMove(const Rect &a){
-        if(not checkIn(a))return false;
         if(not IsIn(a.x1, a.y1) || not IsIn(a.x2, a.y2)){
             return false;
         }
@@ -397,6 +314,9 @@ public:
         return true;
     }
     void setGreedy(int idx, bool x1, bool x2, bool y1, bool y2){
+        int j = bit(3)*x1+bit(2)*x2+bit(1)*y1+bit(0)*y2;
+        if(not(x1 || x2 || y1 || y2))return;
+        if(calcedCnt[idx][j])return;
         auto check = [&](int mid) -> bool{
             Rect tmp = out[idx];
             if(x1)tmp.x1 -= mid;
@@ -427,6 +347,7 @@ public:
         if(x2)out[idx].x2 += ok;
         if(y1)out[idx].y1 -= ok;
         if(y2)out[idx].y2 += ok;
+        calcedCnt[idx][j]++;
     }
     void swapXYofOut(){
         rep(i,N){
@@ -441,12 +362,6 @@ public:
         rep(idx,N){
             cout << out[idx] << endl;
         }
-    }
-    void outPutOneLine(){
-        rep(idx,N){
-            cout << out[idx] << " ";
-        }
-        cout << endl;
     }
     // 角(x, y),　縦rx, 横ryの長方形
     void recSet(int x, int y, int rx, int ry, int idx){
@@ -496,17 +411,16 @@ public:
 int main() {
     aMyTimer.reset();
     Solver aSolver;
+    aSolver.pointSets(); // 一番簡単
     aSolver.HogeSets(false, 0);
     long long maxx = aSolver.calcScoreAll();
-    rep(dir,4)rep(j,1){
-        auto preOut = aSolver.out;
-        aSolver.pointSets();
-        aSolver.HogeSets(false, dir, j);
-        if(not chmax(maxx, aSolver.calcScoreAll())){
-            swap(aSolver.out, preOut);
-        }
-        else{
-            dump(dir, j, maxx);
+    rep(dir,4){
+        auto tSolver = aSolver;
+        tSolver.pointSets();
+        tSolver.HogeSets(false, dir);
+        if(chmax(maxx, tSolver.calcScoreAll())){
+            dump(dir, maxx);
+            swap(tSolver, aSolver);
         }
     }
     int itr = 0;
@@ -518,63 +432,27 @@ int main() {
     long long startScore = aSolver.calcScoreAll();
     bool f = startScore <= 800000000;
     // bool f = false;
-    int changed = 0;
-    vector<int> diffs;
-    ll allScore = aSolver.calcScoreAll(4);
     while(nowTime < 5.33){
-        itr++;
-        nowTime = aMyTimer.get();
-        auto preOuts = aSolver.out;
-        auto preScore = aSolver.calcScoreAll();
-        int div = XorShift()%5;
-        // int div = 4;
-        if(N<150)div = 4;
-        ll divScore = (div == 4 ? 1e15: aSolver.calcScoreAll(div));
-        if(div != 4 && allScore - divScore <= 100000000){
-            continue;
-        }
-        aSolver.RandomMove(div);;
+        auto tSolver = aSolver;
+        aSolver.RandomMove();
         aSolver.HogeSets(true);
-        ll newScore = aSolver.calcScoreAll(4);
+        ll preScore = tSolver.calcScoreAll();
+        ll newScore = aSolver.calcScoreAll();
+        nowTime = aMyTimer.get();
         long double tmp = startTemp + (endTemp - startTemp) * (nowTime - startTime);
         long double prob = exp((newScore-preScore)/tmp);
         if(f){
             if(prob > (XorShift()%INF)/(long double)INF){
-                swap(preOuts, aSolver.out);
-            }
-            else{
-                allScore = newScore;
+                swap(tSolver, aSolver);
             }
         }
         else{
             if(preScore > newScore){
-                swap(preOuts, aSolver.out);
+                swap(tSolver, aSolver);
             }
-            else{
-                allScore = newScore;
-#ifdef DEBUG
-                changed++;
-                diffs.push_back(newScore-preScore);
-#endif
-            }
-        }
-        if(itr % 1000 == 0){
-            dump(itr, aMyTimer.get(), aSolver.calcScoreAll());
-            dump(div, divScore);
-#ifdef FIG
-            // aSolver.outPutOneLine();
-#endif
         }
     }
-#ifdef FIG
-    aSolver.outPutOneLine();
-#else
     aSolver.outPut();
-#ifdef DEBUG
-    aSolver.debug();
-    dump(changed, itr);;
-    dump(diffs);
-#endif
-    dump(*max_element(all(diffs)));
-#endif
 }
+
+
