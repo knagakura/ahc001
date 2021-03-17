@@ -432,8 +432,10 @@ int main() {
     long long startScore = aSolver.calcScoreAll();
     bool f = startScore <= 800000000;
     // bool f = false;
+    int itr = 0;
     while(nowTime < 5.33){
         auto tSolver = aSolver;
+        itr++;
         aSolver.RandomMove();
         aSolver.HogeSets(true);
         ll preScore = tSolver.calcScoreAll();
@@ -450,6 +452,9 @@ int main() {
             if(preScore > newScore){
                 swap(tSolver, aSolver);
             }
+        }
+        if(itr % 1000 == 0){
+            dump(itr, aSolver.calcScoreAll());
         }
     }
     aSolver.outPut();
