@@ -84,7 +84,12 @@ struct Box{
     ll y1;
     ll x2;
     ll y2;
+    pair<ll,ll> lowerBound;
+    pair<ll,ll> upperBound;
     int idx;
+    Box(){}
+    Box(ll x1_, ll y1_, ll x2_, ll y2_, int idx_):x1(x1_), y1(y1_), x2(x2_), y2(y2_), idx(idx_), lowerBound(x1, y2), upperBound(x2, y2){
+    }
     ll size(){
         return lenx() * leny();
     }
@@ -351,7 +356,7 @@ public:
     }
     void swapXYofOut(){
         rep(i,N){
-            out[i] = Box{out[i].y1, out[i].x1, out[i].y2, out[i].x2, out[i].idx};
+            out[i] = Box(out[i].y1, out[i].x1, out[i].y2, out[i].x2, out[i].idx);
         }
     }
     // 長方形[x1, x2), [y1, y2)
