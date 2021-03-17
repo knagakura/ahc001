@@ -6,3 +6,4 @@ tools/target/release
 a.out
 *out*
 tools/out.svg
+src/saharan.cpp
